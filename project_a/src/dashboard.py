@@ -13,7 +13,11 @@ import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 import os
-import scipy.stats as stats
+try:
+    import scipy.stats as stats
+    SCIPY_AVAILABLE = True
+except ImportError:
+    SCIPY_AVAILABLE = False
 from datetime import datetime
 
 # 페이지 설정
@@ -290,11 +294,12 @@ with kpi_cols[4]:
 st.markdown("---")
 
 # 탭 메뉴 구성
-tab1, tab2, tab3, tab4 = st.tabs([
+tab1, tab2, tab3, tab4, tab5 = st.tabs([
     "👥 1. 고객 프로파일 분석", 
     "📈 2. 거래 매출 & 트렌드 분석", 
     "🏷️ 3. 할인 & 상품 카테고리 분석", 
-    "✉️ 4. 마케팅 캠페인 & 프로모션 효과"
+    "✉️ 4. 마케팅 캠페인 & 프로모션 효과",
+    "💎 5. 고급 RFM 분석 & 이탈 예측"
 ])
 
 # -------------------------------------------------------------
@@ -340,20 +345,23 @@ with tab1:
         freq_no_demo = tx_no_demo.groupby('household_key')['BASKET_ID'].nunique()
         
         # T-test 산출
-        t_val_sales, p_val_sales = stats.ttest_ind(sales_with_demo, sales_no_demo, equal_var=False)
-        t_val_freq, p_val_freq = stats.ttest_ind(freq_with_demo, freq_no_demo, equal_var=False)
-        
-        st.markdown(f"""
-        인구통계 데이터가 매칭되는 801가구 표본과 매칭되지 않는 1,699가구(전체 가구의 68%) 간의 독립표본 t-검정(T-Test) 검증 결과입니다.
-        * **평균 거래액 비교:** 보유 가구 평균 **${sales_with_demo.mean():.2f}** vs 미보유 가구 평균 **${sales_no_demo.mean():.2f}** (p-value: `{p_val_sales:.4f}`)
-        * **구매 빈도(방문 횟수) 비교:** 보유 가구 평균 **{freq_with_demo.mean():.1f}회** vs 미보유 가구 평균 **{freq_no_demo.mean():.1f}회** (p-value: `{p_val_freq:.4f}`)
-        """)
-        
-        # T-Test 유효성 판단
-        if p_val_sales > 0.05 and p_val_freq > 0.05:
-            st.info("💡 **T-Test 통계적 유효성 검증 완료:**\n\n두 가구 집단 간의 '평균 매출액'과 '방문 빈도'의 통계적 차이가 유의수준 5% 하에서 유의미하지 않습니다(p-value > 0.05). 따라서 인구통계 정보를 보유한 801가구 표본은 **전체 거래 가구(2,500가구)를 대표하기에 충분한 유효 표본**으로 신뢰할 수 있습니다.")
+        if SCIPY_AVAILABLE:
+            t_val_sales, p_val_sales = stats.ttest_ind(sales_with_demo, sales_no_demo, equal_var=False)
+            t_val_freq, p_val_freq = stats.ttest_ind(freq_with_demo, freq_no_demo, equal_var=False)
+            
+            st.markdown(f"""
+            인구통계 데이터가 매칭되는 801가구 표본과 매칭되지 않는 1,699가구(전체 가구의 68%) 간의 독립표본 t-검정(T-Test) 검증 결과입니다.
+            * **평균 거래액 비교:** 보유 가구 평균 **${sales_with_demo.mean():.2f}** vs 미보유 가구 평균 **${sales_no_demo.mean():.2f}** (p-value: `{p_val_sales:.4f}`)
+            * **구매 빈도(방문 횟수) 비교:** 보유 가구 평균 **{freq_with_demo.mean():.1f}회** vs 미보유 가구 평균 **{freq_no_demo.mean():.1f}회** (p-value: `{p_val_freq:.4f}`)
+            """)
+            
+            # T-Test 유효성 판단
+            if p_val_sales > 0.05 and p_val_freq > 0.05:
+                st.info("💡 **T-Test 통계적 유효성 검증 완료:**\n\n두 가구 집단 간의 '평균 매출액'과 '방문 빈도'의 통계적 차이가 유의수준 5% 하에서 유의미하지 않습니다(p-value > 0.05). 따라서 인구통계 정보를 보유한 801가구 표본은 **전체 거래 가구(2,500가구)를 대표하기에 충분한 유효 표본**으로 신뢰할 수 있습니다.")
+            else:
+                st.warning("⚠️ **T-Test 통계적 유의차 발견:**\n\n두 가구 집단 간 구매 패턴에 차이가 있으므로 분석 시 샘플링 편향에 유의해야 합니다.")
         else:
-            st.warning("⚠️ **T-Test 통계적 유의차 발견:**\n\n두 가구 집단 간 구매 패턴에 차이가 있으므로 분석 시 샘플링 편향에 유의해야 합니다.")
+            st.warning("⚠️ **통계 라이브러리(scipy) 부재:**\n\n환경 설정 문제로 인해 통계 검증(T-Test) 기능을 일시적으로 사용할 수 없습니다. 대시보드의 다른 기능은 정상 작동합니다.")
 
     st.markdown("---")
     
@@ -830,6 +838,121 @@ with tab4:
         )
         fig_timeline.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', height=350)
         st.plotly_chart(fig_timeline, use_container_width=True)
+
+# -------------------------------------------------------------
+# TAB 5: 고급 RFM 분석 & 이탈 예측
+# -------------------------------------------------------------
+with tab5:
+    st.header("💎 고급 RFM 분석 및 이탈 위험군(Churn) 식별")
+    st.markdown("고객의 최근성(Recency), 빈도(Frequency), 금액(Monetary)을 정량화하여 핵심 수익원과 이탈 징후가 포착되는 위기 고객을 분별합니다.")
+    
+    col5_1, col5_2 = st.columns(2)
+    
+    with col5_1:
+        st.subheader("1) RFM 고객 세그먼트별 가구 수 분포")
+        seg_counts = rfm_df['RFM_Segment'].value_counts().reset_index()
+        seg_counts.columns = ['RFM_Segment', 'Count']
+        
+        fig_seg_bar = px.bar(
+            seg_counts, x='RFM_Segment', y='Count',
+            text='Count',
+            labels={'RFM_Segment': 'RFM 세그먼트', 'Count': '가구 수'},
+            color='RFM_Segment',
+            color_discrete_map={
+                "VIP 고객": "#5E81AC",
+                "충성 고객": "#81A1C1",
+                "신규 유망 고객": "#A3BE8C",
+                "일반 고객": "#EBCB8B",
+                "이탈 우려 고객": "#D08770",
+                "휴면/이탈 고객": "#BF616A"
+            }
+        )
+        fig_seg_bar.update_traces(textposition='outside')
+        fig_seg_bar.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', height=350, showlegend=False)
+        st.plotly_chart(fig_seg_bar, use_container_width=True)
+        
+    with col5_2:
+        st.subheader("2) 세그먼트별 총 매출 기여도 (Pareto Analysis)")
+        seg_sales = rfm_df.groupby('RFM_Segment')['Monetary'].sum().sort_values(ascending=False).reset_index()
+        seg_sales['CumulativeShare'] = seg_sales['Monetary'].cumsum() / seg_sales['Monetary'].sum() * 100
+        
+        fig_pareto = go.Figure()
+        fig_pareto.add_trace(go.Bar(
+            x=seg_sales['RFM_Segment'], y=seg_sales['Monetary'],
+            name='매출액 ($)', marker_color='#81A1C1'
+        ))
+        fig_pareto.add_trace(go.Scatter(
+            x=seg_sales['RFM_Segment'], y=seg_sales['CumulativeShare'],
+            name='누적 비중 (%)', yaxis='y2',
+            line=dict(color='#BF616A', width=3),
+            mode='lines+markers'
+        ))
+        
+        fig_pareto.update_layout(
+            yaxis=dict(title='누적 매출액 ($)'),
+            yaxis2=dict(title='누적 비중 (%)', overlaying='y', side='right', range=[0, 110]),
+            plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+            height=350
+        )
+        st.plotly_chart(fig_pareto, use_container_width=True)
+        st.markdown("**인사이트:** 상위 2개 세그먼트(VIP, 충성 고객)가 전체 매출의 약 70% 이상을 견인하는 핵심 수익원입니다.")
+
+    st.markdown("---")
+    
+    col5_3, col5_4 = st.columns(2)
+    
+    with col5_3:
+        st.subheader("3) Recency vs Frequency 리스크 매트릭스")
+        st.markdown("구매 간격(R)이 길어지면서 방문 빈도(F)가 낮은 영역에 분포한 고객은 이탈 확률이 매우 높은 고위험군입니다.")
+        
+        # 히트맵 데이터 생성
+        rf_matrix = rfm_df.groupby(['R_score', 'F_score']).size().unstack(fill_value=0)
+        
+        fig_heat = px.imshow(
+            rf_matrix,
+            labels=dict(x="Frequency Score (1:낮음 -> 5:높음)", y="Recency Score (1:옛날 -> 5:최근)", color="가구 수"),
+            x=['1', '2', '3', '4', '5'],
+            y=['1', '2', '3', '4', '5'],
+            color_continuous_scale='YlOrRd',
+            text_auto=True
+        )
+        fig_heat.update_layout(height=400)
+        st.plotly_chart(fig_heat, use_container_width=True)
+        
+    with col5_4:
+        st.subheader("4) 고객 이탈(Churn) 예측 및 방어 전략")
+        
+        # 간단한 확률 기반 예측 (Recency 점수가 낮고 Frequency 점수가 낮을수록 위험도 상승)
+        churn_risk_hh = rfm_df[rfm_df['R_score'] <= 2].copy()
+        high_risk_count = len(churn_risk_hh[churn_risk_hh['F_score'] <= 2])
+        med_risk_count = len(churn_risk_hh[churn_risk_hh['F_score'] > 2])
+        
+        st.markdown(f"""
+        <div style="padding: 15px; border-radius: 8px; background-color: #F8F9FB; border-left: 5px solid #BF616A;">
+            <h4 style="margin-top:0;">⚠️ 이탈 고위험군 분석 요약</h4>
+            <ul>
+                <li><strong>고위험(High Risk):</strong> <span style="color:#BF616A; font-weight:bold;">{high_risk_count} 가구</span> (R=1~2 & F=1~2)</li>
+                <li><strong>중위험(Medium Risk):</strong> <span style="color:#D08770; font-weight:bold;">{med_risk_count} 가구</span> (R=1~2 & F=3~5)</li>
+            </ul>
+            <p style="font-size: 14px; line-height: 1.6;">
+                <strong>🎯 이탈 방어 액션 플랜:</strong><br>
+                1. <strong>고위험군:</strong> 즉각적인 'Welcome Back' 대형 할인 쿠폰(30%+)을 발송하여 재방문을 유도하세요.<br>
+                2. <strong>중위험군:</strong> 과거 구매 이력이 풍부하므로, 선호 카테고리 기반의 큐레이션 메일을 통해 관계를 재정립하세요.<br>
+                3. <strong>VIP 이탈 징후:</strong> F점수가 높았던 VIP 고객의 R점수가 3점 이하로 떨어지는 즉시 전담 매니저 오퍼를 제공해야 합니다.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # 세그먼트별 평균 지출액 비교
+        avg_monetary = rfm_df.groupby('RFM_Segment')['Monetary'].mean().reset_index()
+        fig_avg_m = px.bar(
+            avg_monetary, x='RFM_Segment', y='Monetary',
+            labels={'Monetary': '가구당 평균 구매액 ($)'},
+            color_discrete_sequence=['#5E81AC']
+        )
+        fig_avg_m.update_layout(height=220, margin=dict(t=10, b=10))
+        st.plotly_chart(fig_avg_m, use_container_width=True)
 
 # -------------------------------------------------------------
 # 대시보드 하단 푸터 영역
