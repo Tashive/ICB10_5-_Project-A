@@ -1,0 +1,1 @@
+﻿C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\Bandizip\;C:\Program Files\dotnet\;C:\Program Files\nodejs\;C:\Users\tasha\AppData\Local\Microsoft\WindowsApps;C:\Users\tasha\AppData\Local\Programs\Antigravity\bin;C:\Users\tasha\AppData\Roaming\npm

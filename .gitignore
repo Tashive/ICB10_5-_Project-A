@@ -1,0 +1,24 @@
+.venv/
+node_modules/
+*.bak
+*.log
+*.docx
+*.pdf
+package-lock.json
+.antigravityignore
+
+# Ignore credentials and agent workspace files
+.agents/
+.gemini/
+
+# Ignore root-level large archives and temp folders
+/archive.zip
+/archive/
+team_prompt/
+
+# Ignore all CSV files in the parent data directory (not needed for dashboard)
+project_a/data/*.csv
+
+# Ignore other unrelated projects in this workspace to prevent uploading large files
+nps-company/
+online-retail/
