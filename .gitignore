@@ -16,8 +16,10 @@ package-lock.json
 /archive/
 team_prompt/
 
-# Ignore all CSV files in the parent data directory (not needed for dashboard)
-project_a/data/*.csv
+# Ignore all large raw CSV files in the data archive directory
+project_a/data/archive/transaction_data.csv
+project_a/data/archive/causal_data.csv
+project_a/data/archive/*.bak
 
 # Ignore other unrelated projects in this workspace to prevent uploading large files
 nps-company/

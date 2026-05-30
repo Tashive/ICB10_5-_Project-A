@@ -90,11 +90,11 @@ def load_data():
     hh_demo = pd.read_csv(os.path.join(DATA_DIR, 'hh_demographic.csv'))
     product = pd.read_csv(os.path.join(DATA_DIR, 'product.csv'))
     
-    # 141MB 거래 데이터 - 성능 최적화를 위해 일부 타입 정제 및 로딩
-    transaction = pd.read_csv(os.path.join(DATA_DIR, 'transaction_data.csv'))
+    # 141MB 거래 데이터 - 성능 최적화를 위해 gzip 압축 형태로 로딩
+    transaction = pd.read_csv(os.path.join(DATA_DIR, 'transaction_data.csv.gz'))
     
-    # 695MB 인과 데이터 - 200만 건 중 100만 건 샘플하여 처리 속도 보장
-    causal = pd.read_csv(os.path.join(DATA_DIR, 'causal_data.csv'), nrows=1000000)
+    # 695MB 인과 데이터 - 성능 최적화를 위해 gzip 압축 형태 및 100만 건 샘플 로딩
+    causal = pd.read_csv(os.path.join(DATA_DIR, 'causal_data.csv.gz'), nrows=1000000)
     
     # 중복 제거
     campaign_desc.drop_duplicates(inplace=True)
