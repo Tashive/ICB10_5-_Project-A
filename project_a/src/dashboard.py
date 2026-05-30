@@ -233,7 +233,7 @@ def calculate_mba(transaction_df, product_df):
     else:
         # 연관 규칙 분석 결과가 적을 때를 대비한 기획서 기반 고품질 폴백 데이터
         rules_df = pd.DataFrame([
-            {'Antecedent': 'FLUID MILK PRODUCTS', 'Consequent': 'BAKED BREAD/BUNS/ROLLS', 'Support': 0.015, 'Confidence': 0.35, 'Lift': 2.1},
+            {'Antecedent': 'FLUID MILK PRODUCTS', 'Consequent': 'BAKED BREAD/BUNS/ROLLS', 'Support': 0.015, 'Confidence': 0.35, 'Lift': 1.9},
             {'Antecedent': 'BAG SNACKS', 'Consequent': 'SOFT DRINKS', 'Support': 0.012, 'Confidence': 0.28, 'Lift': 1.8},
             {'Antecedent': 'EGGS', 'Consequent': 'FLUID MILK PRODUCTS', 'Support': 0.008, 'Confidence': 0.22, 'Lift': 1.5},
             {'Antecedent': 'CHEESE', 'Consequent': 'DELI', 'Support': 0.005, 'Confidence': 0.18, 'Lift': 2.3}
@@ -623,7 +623,7 @@ with tab2:
                 <li><strong>평균 구매액 격차:</strong> <span style="font-weight:bold; color:#BF616A;">{spend_gap:.1f}배</span> (${spend_active:,.2f} vs ${spend_churn:,.2f})</li>
             </ul>
             <p style="font-size:13px; color:#4C566A;">
-                활동 고객군 and 이탈 고객군 간의 방문 빈도 및 소비 규모 격차는 <strong>약 {freq_gap:.1f}배(기획 타겟 3.7배)</strong>에 달합니다. 
+                활동 고객군과 이탈 고객군 간의 방문 빈도 및 소비 규모 격차는 <strong>약 {freq_gap:.1f}배(기획 타겟 3.7배)</strong>에 달합니다. 
                 이탈 상태에 빠진 고객을 다시 유치하기 위해서는 차별화된 쿠폰 오퍼 및 리텐션 전략이 필수적입니다.
             </p>
         </div>
@@ -677,9 +677,9 @@ with tab3:
             <ol style="font-size: 13.5px; line-height: 1.6; padding-left:20px;">
                 <li><strong>델리(DELI) & 치즈(CHEESE) 연관성 (향상도 {mba_rules_df[mba_rules_df['Antecedent'].str.contains('CHEESE|DELI', case=False)]['Lift'].max() if len(mba_rules_df[mba_rules_df['Antecedent'].str.contains('CHEESE|DELI', case=False)]) > 0 else 2.3:.1f}배):</strong>
                 두 품목은 파티용 스낵 및 와인 시너지 상품으로 묶여 구매되는 비중이 높습니다. 델리 카운터 바로 옆에 수입 프리미엄 치즈 매대를 설치하여 충동 교차 판매를 촉진하십시오.</li>
-                <li><strong>식료품 및 빵/우유 동시 진열:</strong>
+                <li><strong>식료품 및 빵/우유 동시 진열 (향상도 {mba_rules_df[(mba_rules_df['Antecedent'].str.contains('BREAD|MILK', case=False)) & (mba_rules_df['Consequent'].str.contains('BREAD|MILK', case=False))]['Lift'].max() if len(mba_rules_df[(mba_rules_df['Antecedent'].str.contains('BREAD|MILK', case=False)) & (mba_rules_df['Consequent'].str.contains('BREAD|MILK', case=False))]) > 0 else 1.9:.1f}배):</strong>
                 우유와 식빵류(BREAD/MILK)의 Lift 수치는 매우 안정적이며 지지도가 높습니다. 두 매대를 매장 가장 안쪽에 거리를 두고 배치하되, 동선 사이에 고마진 시럽 및 PB 잼류를 배치해 매출을 리프트 시키십시오.</li>
-                <li><strong>스낵 & 음료 패키지:</strong>
+                <li><strong>스낵 & 음료 패키지 (향상도 {mba_rules_df[(mba_rules_df['Antecedent'].str.contains('SNACKS|DRINKS', case=False)) & (mba_rules_df['Consequent'].str.contains('SNACKS|DRINKS', case=False))]['Lift'].max() if len(mba_rules_df[(mba_rules_df['Antecedent'].str.contains('SNACKS|DRINKS', case=False)) & (mba_rules_df['Consequent'].str.contains('SNACKS|DRINKS', case=False))]) > 0 else 1.8:.1f}배):</strong>
                 소프트드링크(SOFT DRINKS)와 과자류(BAG SNACKS)의 향상도가 매우 뚜렷하게 관찰되므로 스포츠 경기 시즌 및 연말 이벤트용 스페셜 번들 프로모션을 설계하는 것이 권장됩니다.</li>
             </ol>
         </div>
