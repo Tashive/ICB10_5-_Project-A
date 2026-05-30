@@ -93,8 +93,8 @@ def load_data():
     # 141MB 거래 데이터 - 성능 최적화를 위해 gzip 압축 형태로 로딩
     transaction = pd.read_csv(os.path.join(DATA_DIR, 'transaction_data.csv.gz'))
     
-    # 695MB 인과 데이터 - 성능 최적화를 위해 gzip 압축 형태 및 100만 건 샘플 로딩
-    causal = pd.read_csv(os.path.join(DATA_DIR, 'causal_data.csv.gz'), nrows=1000000)
+    # 695MB 인과 데이터 - 성능 최적화를 위해 gzip 압축 형태 및 10만 건 샘플 로딩
+    causal = pd.read_csv(os.path.join(DATA_DIR, 'causal_data.csv.gz'), nrows=100000)
     
     # 중복 제거
     campaign_desc.drop_duplicates(inplace=True)
@@ -121,7 +121,9 @@ def load_data():
 try:
     campaign_desc, campaign_table, coupon, coupon_redempt, hh_demo, product, transaction, causal = load_data()
 except Exception as e:
-    st.error(f"데이터 로드에 실패했습니다. 경로를 확인해주세요. 에러: {e}")
+    import traceback
+    st.exception(e)
+    st.code(traceback.format_exc())
     st.stop()
 
 # -------------------------------------------------------------
