@@ -28,6 +28,8 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+st.write("dashboard.py loaded")
+
 # 노르딕 디자인 컬러 팔레트 정의
 NORD_PALETTE = {
     "Primary": "#5E81AC",      # Nord Blue
@@ -83,15 +85,23 @@ DATA_DIR = os.path.join(BASE_DIR, 'data', 'archive')
 # -------------------------------------------------------------
 @st.cache_data(show_spinner="대용량 데이터를 분석용으로 전처리 및 로딩 중입니다...")
 def load_data():
+    st.write("load_data entered")
     campaign_desc = pd.read_csv(os.path.join(DATA_DIR, 'campaign_desc.csv'))
+    st.write("campaign_desc loaded")
     campaign_table = pd.read_csv(os.path.join(DATA_DIR, 'campaign_table.csv'))
+    st.write("campaign_table loaded")
     coupon = pd.read_csv(os.path.join(DATA_DIR, 'coupon.csv'))
+    st.write("coupon loaded")
     coupon_redempt = pd.read_csv(os.path.join(DATA_DIR, 'coupon_redempt.csv'))
+    st.write("coupon_redempt loaded")
     hh_demo = pd.read_csv(os.path.join(DATA_DIR, 'hh_demographic.csv'))
+    st.write("hh_demographic loaded")
     product = pd.read_csv(os.path.join(DATA_DIR, 'product.csv'))
+    st.write("product loaded")
     
     # 141MB 거래 데이터 - 성능 최적화를 위해 gzip 압축 형태로 로딩
     transaction = pd.read_csv(os.path.join(DATA_DIR, 'transaction_data.csv.gz'))
+    st.write("transaction loaded")
     
     # 695MB 인과 데이터 - 성능 최적화를 위해 gzip 압축 형태 및 10만 건 샘플 로딩
     causal = pd.read_csv(os.path.join(DATA_DIR, 'causal_data.csv.gz'), nrows=100000)
@@ -118,6 +128,7 @@ def load_data():
     
     return campaign_desc, campaign_table, coupon, coupon_redempt, hh_demo, product, transaction, causal
 
+st.write("before load_data")
 try:
     campaign_desc, campaign_table, coupon, coupon_redempt, hh_demo, product, transaction, causal = load_data()
 except Exception as e:
