@@ -29,7 +29,7 @@ st.set_page_config(
 )
 
 st.write("APP STARTED")
-st.write("dashboard.py loaded")
+st.write("retail_dashboard.py loaded")
 
 # 노르딕 디자인 컬러 팔레트 정의
 NORD_PALETTE = {
