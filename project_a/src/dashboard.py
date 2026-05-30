@@ -52,6 +52,7 @@ st.markdown("""
     }
     .metric-card {
         background-color: #ECEFF4;
+        color: #4C566A;
         border-left: 5px solid #5E81AC;
         padding: 15px;
         border-radius: 6px;
@@ -613,7 +614,7 @@ with tab2:
     
     with col_gap1:
         st.markdown(f"""
-        <div style="background-color: #ECEFF4; padding: 20px; border-radius: 8px; border-left: 5px solid #BF616A;">
+        <div style="background-color: #ECEFF4; color: #4C566A; padding: 20px; border-radius: 8px; border-left: 5px solid #BF616A;">
             <h4 style="margin-top:0; color:#BF616A;">⚠️ 고객 집단 간 격차 분석</h4>
             <ul>
                 <li><strong>활동 고객군 평균 방문 빈도:</strong> {freq_active:.1f}회</li>
@@ -671,7 +672,7 @@ with tab3:
     with col_mba2:
         st.subheader("💡 상품 인접 진열 및 교차 판촉 전략")
         st.markdown(f"""
-        <div style="background-color: #ECEFF4; padding: 20px; border-radius: 8px; border-left: 5px solid #A3BE8C; height: 100%;">
+        <div style="background-color: #ECEFF4; color: #4C566A; padding: 20px; border-radius: 8px; border-left: 5px solid #A3BE8C; height: 100%;">
             <h4 style="margin-top:0; color:#4C566A;">🎯 MBA 기반 진열 제안 보고</h4>
             <ol style="font-size: 13.5px; line-height: 1.6; padding-left:20px;">
                 <li><strong>델리(DELI) & 치즈(CHEESE) 연관성 (향상도 {mba_rules_df[mba_rules_df['Antecedent'].str.contains('CHEESE|DELI', case=False)]['Lift'].max() if len(mba_rules_df[mba_rules_df['Antecedent'].str.contains('CHEESE|DELI', case=False)]) > 0 else 2.3:.1f}배):</strong>
@@ -756,7 +757,7 @@ with tab4:
         
     st.markdown("---")
     st.markdown(f"""
-    <div style="background-color: #ECEFF4; padding: 20px; border-radius: 8px; border-left: 5px solid #D08770; font-size: 14px;">
+    <div style="background-color: #ECEFF4; color: #4C566A; padding: 20px; border-radius: 8px; border-left: 5px solid #D08770; font-size: 14px;">
         <strong>🎯 마케팅 효율 및 타겟팅 의사결정 시사점:</strong><br>
         쿠폰을 적극 수용하고 사용하는 가구일수록 객단가와 내점 주기 관리가 훨씬 효과적으로 유지되며, 이는 LTV를 극대화시키는 핵심 열쇠입니다.
         쿠폰 무차별 살포를 중단하고, 현재 반응이 낮은 고객군을 타겟으로 세그먼트별 맞춤 정밀 오퍼를 발송하여 ROI를 극대화해야 합니다.
