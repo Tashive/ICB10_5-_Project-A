@@ -28,6 +28,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+st.write("APP STARTED")
 st.write("dashboard.py loaded")
 
 # 노르딕 디자인 컬러 팔레트 정의
@@ -86,25 +87,32 @@ DATA_DIR = os.path.join(BASE_DIR, 'data', 'archive')
 @st.cache_data(show_spinner="대용량 데이터를 분석용으로 전처리 및 로딩 중입니다...")
 def load_data():
     st.write("load_data entered")
+    
     campaign_desc = pd.read_csv(os.path.join(DATA_DIR, 'campaign_desc.csv'))
-    st.write("campaign_desc loaded")
+    st.write(f"campaign_desc loaded. Shape: {campaign_desc.shape}, Memory: {campaign_desc.memory_usage(deep=True).sum() / (1024*1024):.2f} MB")
+    
     campaign_table = pd.read_csv(os.path.join(DATA_DIR, 'campaign_table.csv'))
-    st.write("campaign_table loaded")
+    st.write(f"campaign_table loaded. Shape: {campaign_table.shape}, Memory: {campaign_table.memory_usage(deep=True).sum() / (1024*1024):.2f} MB")
+    
     coupon = pd.read_csv(os.path.join(DATA_DIR, 'coupon.csv'))
-    st.write("coupon loaded")
+    st.write(f"coupon loaded. Shape: {coupon.shape}, Memory: {coupon.memory_usage(deep=True).sum() / (1024*1024):.2f} MB")
+    
     coupon_redempt = pd.read_csv(os.path.join(DATA_DIR, 'coupon_redempt.csv'))
-    st.write("coupon_redempt loaded")
+    st.write(f"coupon_redempt loaded. Shape: {coupon_redempt.shape}, Memory: {coupon_redempt.memory_usage(deep=True).sum() / (1024*1024):.2f} MB")
+    
     hh_demo = pd.read_csv(os.path.join(DATA_DIR, 'hh_demographic.csv'))
-    st.write("hh_demographic loaded")
+    st.write(f"hh_demographic loaded. Shape: {hh_demo.shape}, Memory: {hh_demo.memory_usage(deep=True).sum() / (1024*1024):.2f} MB")
+    
     product = pd.read_csv(os.path.join(DATA_DIR, 'product.csv'))
-    st.write("product loaded")
+    st.write(f"product loaded. Shape: {product.shape}, Memory: {product.memory_usage(deep=True).sum() / (1024*1024):.2f} MB")
     
     # 141MB 거래 데이터 - 성능 최적화를 위해 gzip 압축 형태로 로딩
     transaction = pd.read_csv(os.path.join(DATA_DIR, 'transaction_data.csv.gz'))
-    st.write("transaction loaded")
+    st.write(f"transaction loaded. Shape: {transaction.shape}, Memory: {transaction.memory_usage(deep=True).sum() / (1024*1024):.2f} MB")
     
     # 695MB 인과 데이터 - 성능 최적화를 위해 gzip 압축 형태 및 10만 건 샘플 로딩
     causal = pd.read_csv(os.path.join(DATA_DIR, 'causal_data.csv.gz'), nrows=100000)
+    st.write(f"causal loaded. Shape: {causal.shape}, Memory: {causal.memory_usage(deep=True).sum() / (1024*1024):.2f} MB")
     
     # 중복 제거
     campaign_desc.drop_duplicates(inplace=True)
@@ -126,11 +134,20 @@ def load_data():
         '100-124K', '125-149K', '150-174K', '175-199K', '200-249K', '250K+'
     ], ordered=True)
     
-    return campaign_desc, campaign_table, coupon, coupon_redempt, hh_demo, product, transaction, causal
+    # [OOM 방지] 260만 행에 달하는 transaction 가구별 요약 테이블을 미리 한 번만 연산해서 캐싱
+    st.write("Calculating hh_summary to prevent OOM...")
+    hh_summary = transaction.groupby('household_key').agg(
+        TotalSales=('SALES_VALUE', 'sum'),
+        VisitDays=('DAY', 'nunique'),
+        TxCount=('BASKET_ID', 'size')
+    ).reset_index()
+    st.write("hh_summary calculated successfully!")
+    
+    return campaign_desc, campaign_table, coupon, coupon_redempt, hh_demo, product, transaction, causal, hh_summary
 
 st.write("before load_data")
 try:
-    campaign_desc, campaign_table, coupon, coupon_redempt, hh_demo, product, transaction, causal = load_data()
+    campaign_desc, campaign_table, coupon, coupon_redempt, hh_demo, product, transaction, causal, hh_summary = load_data()
 except Exception as e:
     import traceback
     st.exception(e)
@@ -855,13 +872,11 @@ with tab5:
             st.plotly_chart(fig_hour, use_container_width=True)
             
         st.subheader("연령대별 구매 행동 다변량 요약 정보")
-        hh_sales = filtered_transaction.groupby('household_key')['SALES_VALUE'].sum().reset_index()
-        hh_visits = filtered_transaction.groupby('household_key')['DAY'].nunique().reset_index()
-        hh_tx_cnt = filtered_transaction.groupby('household_key')['BASKET_ID'].size().reset_index()
+        # [OOM 방지] 260만 행에 달하는 필터링 데이터에 대해 연산을 매번 반복하는 대신,
+        # 캐싱된 hh_summary 데이터를 가구 키 기준으로 필터링하여 2,500가구에 대해서만 초고속 병합을 수행합니다.
+        hh_summary_filtered = hh_summary[hh_summary['household_key'].isin(filtered_hh_keys)]
         
-        hh_merged_details = pd.merge(filtered_hh, hh_sales, on='household_key', how='inner')
-        hh_merged_details = pd.merge(hh_merged_details, hh_visits, on='household_key', how='inner')
-        hh_merged_details = pd.merge(hh_merged_details, hh_tx_cnt, on='household_key', how='inner')
+        hh_merged_details = pd.merge(filtered_hh, hh_summary_filtered, on='household_key', how='inner')
         hh_merged_details.columns = ['AGE_DESC', 'MARITAL_STATUS_CODE', 'INCOME_DESC', 'HOMEOWNER_DESC', 'HH_COMP_DESC', 'HOUSEHOLD_SIZE_DESC', 'KID_CATEGORY_DESC', 'household_key', 'TotalSales', 'VisitDays', 'TxCount']
         
         age_summary = hh_merged_details.groupby('AGE_DESC').agg(
