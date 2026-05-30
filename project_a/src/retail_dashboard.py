@@ -322,7 +322,7 @@ def calculate_campaign_roi(campaign_table_df, campaign_desc_df, transaction_df, 
 # -------------------------------------------------------------
 # 사이드바 레이아웃 (필터 컨트롤러)
 # -------------------------------------------------------------
-st.sidebar.image("https://images.unsplash.com/photo-1542744094-3a31f103e35f?auto=format&fit=crop&w=400&q=80", use_container_width=True)
+st.sidebar.image("https://images.unsplash.com/photo-1542744094-3a31f103e35f?auto=format&fit=crop&w=400&q=80", width='stretch')
 st.sidebar.title("🎛️ 필터 컨트롤 타워")
 st.sidebar.markdown("---")
 
@@ -497,7 +497,7 @@ with tab1:
             color_discrete_sequence=[NORD_PALETTE['Primary']]
         )
         fig_weekly.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', height=350)
-        st.plotly_chart(fig_weekly, use_container_width=True)
+        st.plotly_chart(fig_weekly, width='stretch')
         st.markdown("**해석:** 주간 매출은 연말 연휴 시즌(52주차 부근)에 최고점을 기록하는 뚜렷한 계절성을 띱니다.")
         
     with col_home2:
@@ -511,7 +511,7 @@ with tab1:
             labels={'BRAND': '브랜드 유형', 'SALES_VALUE': '매출액 ($)'}
         )
         fig_brand_donut.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', height=350, margin=dict(t=30, b=30, l=10, r=10))
-        st.plotly_chart(fig_brand_donut, use_container_width=True)
+        st.plotly_chart(fig_brand_donut, width='stretch')
         st.markdown("**해석:** 자체 브랜드(Private) 상품의 매출 비중을 파악하여 PB 육성 전략의 성과를 평가합니다.")
 
     st.markdown("---")
@@ -552,7 +552,7 @@ with tab2:
         )
         fig_seg_bar.update_traces(textposition='outside')
         fig_seg_bar.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', height=350, showlegend=False)
-        st.plotly_chart(fig_seg_bar, use_container_width=True)
+        st.plotly_chart(fig_seg_bar, width='stretch')
         
     with col_cust2:
         st.subheader("2) 세그먼트별 매출 기여도 파레토 분석")
@@ -577,7 +577,7 @@ with tab2:
             legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
             height=350
         )
-        st.plotly_chart(fig_pareto, use_container_width=True)
+        st.plotly_chart(fig_pareto, width='stretch')
 
     st.subheader("3) RFM 세그먼트별 상세 통계")
     rfm_stats = rfm_df.groupby('RFM_Segment').agg(
@@ -592,7 +592,7 @@ with tab2:
         '평균 최근성 (일)': '{:.1f}',
         '평균 구매 빈도 (회)': '{:.1f}',
         '평균 구매 금액 ($)': '${:,.2f}'
-    }), use_container_width=True)
+    }), width='stretch')
 
     st.markdown("---")
     
@@ -653,7 +653,7 @@ with tab2:
             labels={'값': '지표 값', '지표': '평균 성과 항목'}
         )
         fig_gap.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', height=300)
-        st.plotly_chart(fig_gap, use_container_width=True)
+        st.plotly_chart(fig_gap, width='stretch')
 
 # =============================================================
 # TAB 3: 상품 / 시장 장바구니 분석(MBA)
@@ -678,7 +678,7 @@ with tab3:
             text_auto='.2f'
         )
         fig_mba_heat.update_layout(height=400, margin=dict(t=20, b=20, l=10, r=10))
-        st.plotly_chart(fig_mba_heat, use_container_width=True)
+        st.plotly_chart(fig_mba_heat, width='stretch')
         
     with col_mba2:
         st.subheader("💡 상품 인접 진열 및 교차 판촉 전략")
@@ -701,7 +701,7 @@ with tab3:
         'Support': '{:.4f}',
         'Confidence': '{:.2%}',
         'Lift': '{:.2f}'
-    }), use_container_width=True)
+    }), width='stretch')
 
 # =============================================================
 # TAB 4: 전략 / 마케팅 & 쿠폰 효율
@@ -731,7 +731,7 @@ with tab4:
             color_discrete_sequence=[NORD_PALETTE['Primary']]
         )
         fig_scatter.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', height=350)
-        st.plotly_chart(fig_scatter, use_container_width=True)
+        st.plotly_chart(fig_scatter, width='stretch')
         st.markdown(f"**해석:** 캠페인 수신 빈도가 증가할수록 매출액이 뚜렷하게 우상향하는 **강력한 상관관계(상관계수: {corr_val:.2f})**를 보입니다.")
         
     with col_strat2:
@@ -763,7 +763,7 @@ with tab4:
         )
         fig_coupon_bar.update_traces(texttemplate='$%{text:,.2f}', textposition='outside')
         fig_coupon_bar.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', height=350, showlegend=False)
-        st.plotly_chart(fig_coupon_bar, use_container_width=True)
+        st.plotly_chart(fig_coupon_bar, width='stretch')
         st.markdown(f"**해석:** 쿠폰 사용자는 미사용 고객 대비 평균적으로 **약 {coupon_lift:.1f}배(기획 타겟 3.5배)** 높은 매출 가치를 창출합니다.")
         
     st.markdown("---")
@@ -809,26 +809,26 @@ with tab5:
             age_counts = filtered_hh['AGE_DESC'].value_counts().sort_index().reset_index()
             age_counts.columns = ['AGE_DESC', 'Count']
             fig_age = px.bar(age_counts, x='AGE_DESC', y='Count', text='Count', color_discrete_sequence=[NORD_PALETTE['Primary']])
-            st.plotly_chart(fig_age, use_container_width=True)
+            st.plotly_chart(fig_age, width='stretch')
             
             st.subheader("주택 소유 형태별 가구 비중")
             home_counts = filtered_hh['HOMEOWNER_DESC'].value_counts().reset_index()
             home_counts.columns = ['HOMEOWNER_DESC', 'Count']
             fig_home = px.pie(home_counts, values='Count', names='HOMEOWNER_DESC', color_discrete_sequence=px.colors.qualitative.Pastel)
-            st.plotly_chart(fig_home, use_container_width=True)
+            st.plotly_chart(fig_home, width='stretch')
             
         with col_eda_demo2:
             st.subheader("연간 소득 등급별 가구 분포")
             income_counts = filtered_hh['INCOME_DESC'].value_counts().sort_index().reset_index()
             income_counts.columns = ['INCOME_DESC', 'Count']
             fig_income = px.bar(income_counts, x='INCOME_DESC', y='Count', text='Count', color_discrete_sequence=[NORD_PALETTE['Secondary']])
-            st.plotly_chart(fig_income, use_container_width=True)
+            st.plotly_chart(fig_income, width='stretch')
             
             st.subheader("가구원수 구성 분포")
             comp_counts = filtered_hh['HH_COMP_DESC'].value_counts().reset_index()
             comp_counts.columns = ['HH_COMP_DESC', 'Count']
             fig_comp = px.bar(comp_counts, y='HH_COMP_DESC', x='Count', orientation='h', text='Count', color_discrete_sequence=[NORD_PALETTE['AccentGreen']])
-            st.plotly_chart(fig_comp, use_container_width=True)
+            st.plotly_chart(fig_comp, width='stretch')
 
     with st.expander("🏢 2. 매장 및 시간대별 매출 분석", expanded=False):
         col_eda_store1, col_eda_store2 = st.columns(2)
@@ -839,7 +839,7 @@ with tab5:
             store_sales['STORE_ID'] = store_sales['STORE_ID'].astype(str)
             fig_store = px.bar(store_sales, x='STORE_ID', y='SALES_VALUE', text='SALES_VALUE', color_discrete_sequence=[NORD_PALETTE['AccentGreen']])
             fig_store.update_traces(texttemplate='$%{text:,.0f}', textposition='outside')
-            st.plotly_chart(fig_store, use_container_width=True)
+            st.plotly_chart(fig_store, width='stretch')
             
         with col_eda_store2:
             st.subheader("시간대별 고객 유입 및 평균 매출액")
@@ -850,7 +850,7 @@ with tab5:
             fig_hour.add_trace(go.Bar(x=hourly_agg['Hour'], y=hourly_agg['Count'], name='거래 건수', yaxis='y', marker_color=NORD_PALETTE['Secondary'], opacity=0.85))
             fig_hour.add_trace(go.Scatter(x=hourly_agg['Hour'], y=hourly_agg['AvgSales'], name='평균 결제액 ($)', yaxis='y2', line=dict(color=NORD_PALETTE['AccentRed'], width=3), mode='lines+markers'))
             fig_hour.update_layout(yaxis=dict(title='거래 건수'), yaxis2=dict(title='평균 결제액 ($)', overlaying='y', side='right'), plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1), height=350)
-            st.plotly_chart(fig_hour, use_container_width=True)
+            st.plotly_chart(fig_hour, width='stretch')
             
         st.subheader("연령대별 구매 행동 다변량 요약 정보")
         # [OOM 방지] 260만 행에 달하는 필터링 데이터에 대해 연산을 매번 반복하는 대신,
@@ -874,7 +874,7 @@ with tab5:
             '중앙총매출': '${:,.2f}',
             '평균거래건수': '{:.1f}',
             '평균방문일수': '{:.1f}일'
-        }), use_container_width=True)
+        }), width='stretch')
 
     with st.expander("🏷️ 3. 할인 유형 & 상품 상세 카테고리 분석", expanded=False):
         col_eda_prod1, col_eda_prod2 = st.columns(2)
@@ -889,7 +889,7 @@ with tab5:
                 '적용 건수': [retail_disc_count, coupon_disc_count, match_disc_count, no_disc_count]
             })
             fig_disc = px.pie(discount_df, values='적용 건수', names='할인 유형', hole=0.4, color_discrete_sequence=['#81A1C1', '#BF616A', '#EBCB8B', '#A3BE8C'])
-            st.plotly_chart(fig_disc, use_container_width=True)
+            st.plotly_chart(fig_disc, width='stretch')
             
         with col_eda_prod2:
             st.subheader("최다 구매 상품 카테고리(부서) 분포")
@@ -897,13 +897,13 @@ with tab5:
             dept_counts = trans_prod['DEPARTMENT'].value_counts().head(10).reset_index()
             dept_counts.columns = ['DEPARTMENT', 'Count']
             fig_dept = px.bar(dept_counts, y='DEPARTMENT', x='Count', orientation='h', text='Count', color_discrete_sequence=[NORD_PALETTE['Primary']])
-            st.plotly_chart(fig_dept, use_container_width=True)
+            st.plotly_chart(fig_dept, width='stretch')
 
         st.subheader("최다 구매 상품 Top 30 정보 리스트")
         top_prod_30 = filtered_transaction['PRODUCT_ID'].value_counts().head(30).reset_index()
         top_prod_30.columns = ['PRODUCT_ID', 'PurchaseCount']
         top_prod_30_details = pd.merge(top_prod_30, product, on='PRODUCT_ID', how='inner')
-        st.dataframe(top_prod_30_details[['PRODUCT_ID', 'PurchaseCount', 'COMMODITY_DESC', 'BRAND', 'DEPARTMENT']], use_container_width=True)
+        st.dataframe(top_prod_30_details[['PRODUCT_ID', 'PurchaseCount', 'COMMODITY_DESC', 'BRAND', 'DEPARTMENT']], width='stretch')
 
         st.subheader("거래 요인간 상관관계 히트맵 (상관성 검증)")
         corr_df = filtered_transaction[['QUANTITY', 'SALES_VALUE', 'RETAIL_DISC', 'COUPON_DISC', 'COUPON_MATCH_DISC']].copy()
@@ -912,7 +912,7 @@ with tab5:
         corr_df['매칭할인(절대값)'] = corr_df['COUPON_MATCH_DISC'].abs()
         corr_matrix = corr_df[['QUANTITY', 'SALES_VALUE', '소매할인(절대값)', '쿠폰할인(절대값)', '매칭할인(절대값)']].corr()
         fig_corr = px.imshow(corr_matrix, text_auto='.3f', color_continuous_scale='RdBu_r', x=['구매수량', '매출액', '소매할인(절대값)', '쿠폰할인(절대값)', '매칭할인(절대값)'], y=['구매수량', '매출액', '소매할인(절대값)', '쿠폰할인(절대값)', '매칭할인(절대값)'])
-        st.plotly_chart(fig_corr, use_container_width=True)
+        st.plotly_chart(fig_corr, width='stretch')
 
     with st.expander("✉️ 4. 마케팅 캠페인 및 프로모션 상세 분석", expanded=False):
         st.markdown(r"""
@@ -931,7 +931,7 @@ with tab5:
             campaign_performance['CAMPAIGN'] = campaign_performance['CAMPAIGN'].astype(str)
             fig_redempt = px.bar(campaign_performance.head(15), x='CAMPAIGN', y='RedemptionRate(%)', text='RedemptionRate(%)', color_discrete_sequence=[NORD_PALETTE['Primary']])
             fig_redempt.update_traces(texttemplate='%{text}%', textposition='outside')
-            st.plotly_chart(fig_redempt, use_container_width=True)
+            st.plotly_chart(fig_redempt, width='stretch')
             
         with col_eda_camp2:
             st.subheader("판촉 매체 노출 형태 교차 분포 (디스플레이 & 전단)")
@@ -939,17 +939,17 @@ with tab5:
             causal_counts = causal_counts.sort_values(by='Count', ascending=False).head(10)
             causal_counts['Combination'] = "진열:" + causal_counts['display'].astype(str) + " & 전단:" + causal_counts['mailer'].astype(str)
             fig_causal = px.bar(causal_counts, x='Combination', y='Count', text='Count', color_discrete_sequence=[NORD_PALETTE['Secondary']])
-            st.plotly_chart(fig_causal, use_container_width=True)
+            st.plotly_chart(fig_causal, width='stretch')
             
         st.subheader("프로모션 수단 조합별 시너지 효과(Lift) 분석")
         lift_stats = calculate_promo_lift(filtered_transaction, causal)
         fig_lift = px.bar(lift_stats, x='Segment', y='AvgSales', text='AvgSales', color='Segment', color_discrete_sequence=['#D8DEE9', '#81A1C1', '#88C0D0', '#5E81AC'])
         fig_lift.update_traces(texttemplate='$%{text:,.2f}', textposition='outside')
-        st.plotly_chart(fig_lift, use_container_width=True)
+        st.plotly_chart(fig_lift, width='stretch')
 
         st.subheader("캠페인 효율성 종합 ROI 매트릭스")
         roi_matrix_table = calculate_campaign_roi(campaign_table, campaign_desc, filtered_transaction, coupon_redempt)
-        st.dataframe(roi_matrix_table, use_container_width=True)
+        st.dataframe(roi_matrix_table, width='stretch')
 
         col_eda_camp3, col_eda_camp4 = st.columns(2)
         with col_eda_camp3:
@@ -957,7 +957,7 @@ with tab5:
             hh_camp_counts = campaign_table['household_key'].value_counts().reset_index()
             hh_camp_counts.columns = ['household_key', 'CampaignCount']
             fig_participation = px.histogram(hh_camp_counts, x='CampaignCount', nbins=15, color_discrete_sequence=[NORD_PALETTE['AccentGreen']])
-            st.plotly_chart(fig_participation, use_container_width=True)
+            st.plotly_chart(fig_participation, width='stretch')
             
         with col_eda_camp4:
             st.subheader("캠페인 일정 타임라인 중첩 현황 (상위 15)")
@@ -965,7 +965,7 @@ with tab5:
             camp_timeline['CAMPAIGN'] = camp_timeline['CAMPAIGN'].astype(str)
             camp_timeline['Duration'] = camp_timeline['END_DAY'] - camp_timeline['START_DAY']
             fig_timeline = px.bar(camp_timeline, x='Duration', y='CAMPAIGN', base='START_DAY', orientation='h', color='DESCRIPTION', color_discrete_sequence=px.colors.qualitative.Safe)
-            st.plotly_chart(fig_timeline, use_container_width=True)
+            st.plotly_chart(fig_timeline, width='stretch')
 
 # -------------------------------------------------------------
 # 대시보드 하단 푸터 영역
