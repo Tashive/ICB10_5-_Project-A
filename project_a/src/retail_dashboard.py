@@ -75,9 +75,19 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# 경로 설정 (상대 경로 기준 최적화)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DATA_DIR = os.path.join(BASE_DIR, 'data', 'archive')
+# 경로 설정 (Streamlit Cloud / 로컬 환경 모두 호환)
+# Streamlit Cloud에서 __file__이 불안정할 수 있으므로 os.getcwd() 기반 fallback 사용
+_this_file = os.path.abspath(__file__)
+_src_dir = os.path.dirname(_this_file)          # project_a/src
+_project_dir = os.path.dirname(_src_dir)         # project_a
+DATA_DIR = os.path.join(_project_dir, 'data', 'archive')
+
+# Streamlit Cloud fallback: cwd 기준으로 재탐색
+if not os.path.isdir(DATA_DIR):
+    _cwd = os.getcwd()
+    DATA_DIR = os.path.join(_cwd, 'project_a', 'data', 'archive')
+if not os.path.isdir(DATA_DIR):
+    DATA_DIR = os.path.join(os.getcwd(), 'data', 'archive')
 
 # -------------------------------------------------------------
 # 1. 데이터 로드 및 전처리 레이어
@@ -91,11 +101,28 @@ def load_data():
     hh_demo = pd.read_csv(os.path.join(DATA_DIR, 'hh_demographic.csv'))
     product = pd.read_csv(os.path.join(DATA_DIR, 'product.csv'))
     
-    # 141MB 거래 데이터 - 성능 최적화를 위해 gzip 압축 형태로 로딩
-    transaction = pd.read_csv(os.path.join(DATA_DIR, 'transaction_data.csv.gz'))
+    # 141MB 거래 데이터 - dtype 최적화로 메모리 절감 (Streamlit Cloud 1GB 제한 대응)
+    tx_dtypes = {
+        'household_key': 'int32',
+        'BASKET_ID': 'int32',
+        'DAY': 'int16',
+        'PRODUCT_ID': 'int32',
+        'STORE_ID': 'int16',
+        'WEEK_NO': 'int16',
+        'QUANTITY': 'int16',
+        'SALES_VALUE': 'float32',
+        'RETAIL_DISC': 'float32',
+        'COUPON_DISC': 'float32',
+        'COUPON_MATCH_DISC': 'float32',
+        'TRANS_TIME': 'int32',
+    }
+    transaction = pd.read_csv(
+        os.path.join(DATA_DIR, 'transaction_data.csv.gz'),
+        dtype={k: v for k, v in tx_dtypes.items()}
+    )
     
-    # 695MB 인과 데이터 - 성능 최적화를 위해 gzip 압축 형태 및 10만 건 샘플 로딩
-    causal = pd.read_csv(os.path.join(DATA_DIR, 'causal_data.csv.gz'), nrows=100000)
+    # 695MB 인과 데이터 - gzip 압축 형태 및 5만 건 샘플로 축소 (메모리 절감)
+    causal = pd.read_csv(os.path.join(DATA_DIR, 'causal_data.csv.gz'), nrows=50000)
     
     # 중복 제거
     campaign_desc.drop_duplicates(inplace=True)
@@ -726,10 +753,25 @@ with tab4:
         
         fig_scatter = px.scatter(
             camp_corr_df, x='CampaignCount', y='TotalSales',
-            trendline='ols',
             labels={'CampaignCount': '수신 캠페인 횟수 (Frequency)', 'TotalSales': '총 매출액 ($)'},
             color_discrete_sequence=[NORD_PALETTE['Primary']]
         )
+        # statsmodels 의존성 없이 numpy로 직접 OLS 회귀선 추가
+        try:
+            _x = camp_corr_df['CampaignCount'].values
+            _y = camp_corr_df['TotalSales'].values
+            _mask = np.isfinite(_x) & np.isfinite(_y)
+            _coef = np.polyfit(_x[_mask], _y[_mask], 1)
+            _xline = np.array([_x.min(), _x.max()])
+            _yline = np.polyval(_coef, _xline)
+            fig_scatter.add_trace(go.Scatter(
+                x=_xline, y=_yline,
+                mode='lines',
+                name=f'회귀선 (r={corr_val:.2f})',
+                line=dict(color=NORD_PALETTE['AccentRed'], width=2, dash='dash')
+            ))
+        except Exception:
+            pass
         fig_scatter.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', height=350)
         st.plotly_chart(fig_scatter, width='stretch')
         st.markdown(f"**해석:** 캠페인 수신 빈도가 증가할수록 매출액이 뚜렷하게 우상향하는 **강력한 상관관계(상관계수: {corr_val:.2f})**를 보입니다.")
