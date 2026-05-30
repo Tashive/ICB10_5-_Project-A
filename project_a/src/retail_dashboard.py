@@ -28,8 +28,6 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-st.write("APP STARTED")
-st.write("retail_dashboard.py loaded")
 
 # 노르딕 디자인 컬러 팔레트 정의
 NORD_PALETTE = {
@@ -86,33 +84,18 @@ DATA_DIR = os.path.join(BASE_DIR, 'data', 'archive')
 # -------------------------------------------------------------
 @st.cache_data(show_spinner="대용량 데이터를 분석용으로 전처리 및 로딩 중입니다...")
 def load_data():
-    st.write("load_data entered")
-    
     campaign_desc = pd.read_csv(os.path.join(DATA_DIR, 'campaign_desc.csv'))
-    st.write(f"campaign_desc loaded. Shape: {campaign_desc.shape}, Memory: {campaign_desc.memory_usage(deep=True).sum() / (1024*1024):.2f} MB")
-    
     campaign_table = pd.read_csv(os.path.join(DATA_DIR, 'campaign_table.csv'))
-    st.write(f"campaign_table loaded. Shape: {campaign_table.shape}, Memory: {campaign_table.memory_usage(deep=True).sum() / (1024*1024):.2f} MB")
-    
     coupon = pd.read_csv(os.path.join(DATA_DIR, 'coupon.csv'))
-    st.write(f"coupon loaded. Shape: {coupon.shape}, Memory: {coupon.memory_usage(deep=True).sum() / (1024*1024):.2f} MB")
-    
     coupon_redempt = pd.read_csv(os.path.join(DATA_DIR, 'coupon_redempt.csv'))
-    st.write(f"coupon_redempt loaded. Shape: {coupon_redempt.shape}, Memory: {coupon_redempt.memory_usage(deep=True).sum() / (1024*1024):.2f} MB")
-    
     hh_demo = pd.read_csv(os.path.join(DATA_DIR, 'hh_demographic.csv'))
-    st.write(f"hh_demographic loaded. Shape: {hh_demo.shape}, Memory: {hh_demo.memory_usage(deep=True).sum() / (1024*1024):.2f} MB")
-    
     product = pd.read_csv(os.path.join(DATA_DIR, 'product.csv'))
-    st.write(f"product loaded. Shape: {product.shape}, Memory: {product.memory_usage(deep=True).sum() / (1024*1024):.2f} MB")
     
     # 141MB 거래 데이터 - 성능 최적화를 위해 gzip 압축 형태로 로딩
     transaction = pd.read_csv(os.path.join(DATA_DIR, 'transaction_data.csv.gz'))
-    st.write(f"transaction loaded. Shape: {transaction.shape}, Memory: {transaction.memory_usage(deep=True).sum() / (1024*1024):.2f} MB")
     
     # 695MB 인과 데이터 - 성능 최적화를 위해 gzip 압축 형태 및 10만 건 샘플 로딩
     causal = pd.read_csv(os.path.join(DATA_DIR, 'causal_data.csv.gz'), nrows=100000)
-    st.write(f"causal loaded. Shape: {causal.shape}, Memory: {causal.memory_usage(deep=True).sum() / (1024*1024):.2f} MB")
     
     # 중복 제거
     campaign_desc.drop_duplicates(inplace=True)
@@ -135,17 +118,15 @@ def load_data():
     ], ordered=True)
     
     # [OOM 방지] 260만 행에 달하는 transaction 가구별 요약 테이블을 미리 한 번만 연산해서 캐싱
-    st.write("Calculating hh_summary to prevent OOM...")
     hh_summary = transaction.groupby('household_key').agg(
         TotalSales=('SALES_VALUE', 'sum'),
         VisitDays=('DAY', 'nunique'),
         TxCount=('BASKET_ID', 'size')
     ).reset_index()
-    st.write("hh_summary calculated successfully!")
     
     return campaign_desc, campaign_table, coupon, coupon_redempt, hh_demo, product, transaction, causal, hh_summary
 
-st.write("before load_data")
+
 try:
     campaign_desc, campaign_table, coupon, coupon_redempt, hh_demo, product, transaction, causal, hh_summary = load_data()
 except Exception as e:
