@@ -504,7 +504,7 @@ with tab1:
 
     st.markdown("---")
     st.markdown(f"""
-    <div style="background-color: #ECEFF4; padding: 15px; border-radius: 6px; border-left: 5px solid #5E81AC;">
+    <div style="background-color: #ECEFF4; color: #4C566A; padding: 15px; border-radius: 6px; border-left: 5px solid #5E81AC;">
         <strong>📢 종합 성과 요약:</strong><br>
         총 매출 <strong>${total_sales_val:,.2f}</strong> 및 활성 가구 <strong>{active_hh_cnt:,}가구</strong>를 기반으로 분석한 결과, 캠페인 수신 빈도와 가구당 지출액 간에는 <strong>{dynamic_corr:.2f}의 높은 상관관계</strong>가 포착됩니다.
         또한 쿠폰을 사용하는 고객 집단은 미사용 고객 대비 평균적으로 <strong>{dynamic_coupon_lift:.1f}배 높은 구매 매출</strong>을 유발하여 마케팅 캠페인의 높은 ROI 가치가 입증되었습니다.
